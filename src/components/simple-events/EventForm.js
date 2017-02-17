@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 
 class EventForm extends Component {
-	constructor(props) {
-		super(props);
+  constructor(props) {
+    super(props);
 
-		let entry = props.entry;
+    let event = props.event;
 
 		this.state = {
 			title: null,
@@ -13,17 +13,20 @@ class EventForm extends Component {
 			link: null,
 			startDate: null
 		}
-	}
 
-	handleChange(event) {
-		let {value, name} = event.target;
-		this.setState({
-			[name]: value
-		});
-	}
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-	handleSubmit(event) {
-		event.preventDefault();
+  handleChange(event) {
+    const { value, name } = event.target;
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
 
 		let { onSubmit } = this.props;
 		let title = this.valueOf('title');
@@ -32,36 +35,40 @@ class EventForm extends Component {
 		let link = this.valueOf('link');
 		let startDate = this.valueOf('startDate');
 
-		onSubmit({
+    if (!title || !startDate) {
+      return;
+    }
+
+    onSubmit({
 			title,
 			content,
 			location,
 			link,
 			startDate
-		}).then(result=>{
-			this.setState({
+    }).then(result => {
+      this.setState({
 				title: null,
 				content: null,
 				location: null,
 				link: null,
 				startDate: null
-			});
-		});
-	}
+      });
+    });
+  }
 
-	valueOf(prop) {
-		if (this.state[prop] !== null) {
-			return this.state[prop];
-		}
+  valueOf(prop) {
+    if (this.state[prop] !== null) {
+      return this.state[prop];
+    }
 
-		if (this.props.entry && this.props.entry[prop]) {
-			return this.props.entry[prop].raw ?
-			this.props.entry[prop].raw :
-			this.props.entry[prop];
-		}
+    if (this.props.event && this.props.event[prop]) {
+      return this.props.event[prop].raw ?
+        this.props.event[prop].raw :
+        this.props.event[prop];
+    }
 
-		return '';
-	}
+    return '';
+  }
 
 	render() {
 		let values = {
@@ -81,7 +88,8 @@ class EventForm extends Component {
 						type="text"
 						name="title"
 						value={values.title}
-						onChange={this.handleChange.bind(this)} />
+						onChange={this.handleChange.bind(this)}
+						required />
 				</div>
 				<div className="form-field">
 					<label>Location</label>
@@ -105,7 +113,8 @@ class EventForm extends Component {
 						type="text"
 						name="startDate"
 						value={values.startDate}
-						onChange={this.handleChange.bind(this)}/>
+						onChange={this.handleChange.bind(this)}
+						required/>
 				</div>
 				<div className="form-field">
 					<label>Description</label>

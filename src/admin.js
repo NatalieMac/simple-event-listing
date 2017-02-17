@@ -7,13 +7,16 @@ import EventForm from 'components/simple-events/EventForm';
 import EventList from 'components/simple-events/EventList';
 
 class App extends Component {
-	constructor() {
-		super(...arguments);
+	constructor(props) {
+		super(props);
 
 		this.state = {
 			events: [],
-			loading: true
+			loading: true,
 		};
+
+		this.saveEvent = this.saveEvent.bind(this);
+		this.handleEditClick = this.handleEditClick.bind(this);
 	}
 
 	componentDidMount() {
@@ -29,29 +32,23 @@ class App extends Component {
 		this.updateData();
 	}
 
-	updateData() {
-		this.api.simpleEvents()
-			.status('any')
-			.context('edit')
-			.then(events => {
-				this.setState({
-					loading: false,
-					events,
-				});
-			})
-			.catch(e => {
-				this.setState({
-					loading: false,
-				});
-				console.error(e);
-			});
-	}
-
 	saveEvent(event) {
-		let {current_event} = this.state;
+		const { currentEvent } = this.state;
 
-		if (current_event && current_event.id) {
-
+		if (currentEvent && currentEvent.id) {
+			console.log('There is a current event');
+			return this.api.simpleEvents()
+				.id(currentEvent.id)
+				.update(Object.assign(event, {
+					status: 'publish'
+				}))
+				.then(result => {
+					this.setState({
+						currentEvent: null
+					});
+					this.updateData();
+					return result;
+				});
 		}
 
 		return this.api.simpleEvents()
@@ -61,13 +58,39 @@ class App extends Component {
 				event_location: event.location,
 				event_link: event.link,
 				event_start_date: event.startDate,
-				status:'publish'
+				status: 'publish'
 			})
 			.then(result => {
+				console.log(result);
 				this.updateData();
 				return result;
-			})
+			});
 	}
+
+	handleEditClick(event) {
+		this.setState({
+			currentEvent: event
+		});
+	}
+
+  updateData() {
+  	console.log('updating the data!');
+    this.api.simpleEvents()
+      .status('any')
+      .context('edit')
+      .then(events => {
+        this.setState({
+          loading: false,
+          events,
+        });
+      })
+      .catch(e => {
+        this.setState({
+          loading: false,
+        });
+          console.error(e);
+      });
+  }
 
 	render() {
 		if (this.state.loading) {
@@ -81,8 +104,11 @@ class App extends Component {
 		return (
 			<div className='simple-event-listing'>
 				<AdminHeader>Simple Event Listing</AdminHeader>
-				<EventList events={this.state.events} />
-				<EventForm onSubmit={this.saveEvent.bind(this)}/>
+				<EventList
+					events={this.state.events} />
+				<EventForm
+					event={this.state.currentEvent}
+					onSubmit={this.saveEvent.bind(this)}/>
 			</div>
 		);
 	}
