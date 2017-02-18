@@ -7,11 +7,13 @@ import EventForm from 'components/simple-events/EventForm';
 import EventList from 'components/simple-events/EventList';
 
 class App extends Component {
+
 	constructor(props) {
 		super(props);
 
 		this.state = {
-			events: [],
+			authError: false,
+			simpleEvents: [],
 			loading: true,
 		};
 
@@ -32,14 +34,13 @@ class App extends Component {
 		this.updateData();
 	}
 
-	saveEvent(event) {
+	saveEvent(simpleEvent) {
 		const { currentEvent } = this.state;
 
 		if (currentEvent && currentEvent.id) {
-			console.log('There is a current event');
 			return this.api.simpleEvents()
 				.id(currentEvent.id)
-				.update(Object.assign(event, {
+				.update(Object.assign(simpleEvent, {
 					status: 'publish'
 				}))
 				.then(result => {
@@ -53,62 +54,90 @@ class App extends Component {
 
 		return this.api.simpleEvents()
 			.create({
-				title: event.title,
-				content: event.content,
-				event_location: event.location,
-				event_link: event.link,
-				event_start_date: event.startDate,
+				title: simpleEvent.title,
+				content: simpleEvent.content,
+				locale: simpleEvent.locale,
+				link: simpleEvent.link,
+				start_date: simpleEvent.start_date,
 				status: 'publish'
 			})
 			.then(result => {
-				console.log(result);
 				this.updateData();
 				return result;
 			});
 	}
 
-	handleEditClick(event) {
+	handleEditClick(simpleEvent) {
 		this.setState({
-			currentEvent: event
+			currentEvent: simpleEvent
 		});
 	}
 
   updateData() {
-  	console.log('updating the data!');
     this.api.simpleEvents()
       .status('any')
       .context('edit')
-      .then(events => {
+      .then(simpleEvents => {
         this.setState({
           loading: false,
-          events,
+          simpleEvents,
         });
       })
       .catch(e => {
         this.setState({
           loading: false,
         });
+        if (e.data && e.data.status === 400) {
+        	this.setState({
+        		authError: true
+        	});
+        } else {
           console.error(e);
+        }
       });
   }
 
 	render() {
-		if (this.state.loading) {
+		let header = <AdminHeader>Simple Event Listing</AdminHeader>;
+		let listing = this.state.simpleEvents.length ? (
+			<EventList
+				simpleEvents={this.state.simpleEvents}
+				onEdit={this.handleEditClick}
+				selected={this.state.currentEvent}/>
+		) : (
+			<p>No events found</p>
+		);
+
+
+		if (this.state.authError) {
 			return (
 				<div className='simple-event-listing'>
-					<AdminHeader>Simple Event Listing</AdminHeader>
-					<p>Loading&hellip;</p>
+					{header}
+					<h2>Authentication Failure</h2>
+					<p>You must be logged in to manage events</p>
 				</div>
 			);
 		}
+
+		if (this.state.loading) {
+			return (
+				<div className='simple-event-listing'>
+					{header}
+					<p>Loading Simple Events&hellip;</p>
+				</div>
+			);
+		}
+
 		return (
 			<div className='simple-event-listing'>
-				<AdminHeader>Simple Event Listing</AdminHeader>
-				<EventList
-					events={this.state.events} />
-				<EventForm
-					event={this.state.currentEvent}
-					onSubmit={this.saveEvent.bind(this)}/>
+				{header}
+				<div className='simple-event-listing-ui'>
+					{listing}
+					<EventForm
+						simpleEvent={this.state.currentEvent}
+						onSubmit={this.saveEvent}
+						onCancel={this.handleEditClick}/>
+				</div>
 			</div>
 		);
 	}

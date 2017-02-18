@@ -76,14 +76,14 @@ class Simple_Event_Listing {
 		// Event Location field
 		register_rest_field(
 			'simple_event',
-			'event_location',
+			'locale',
 			array(
 				'get_callback' => function ( $data ) {
-					return get_post_meta( $data['id'], '_event_location', true );
+					return get_post_meta( $data['id'], '_locale', true );
 				},
 				'update_callback' => function ( $value, $post ) {
 					$value = sanitize_text_field( $value );
-					update_post_meta( $post->ID, '_event_location', wp_slash( $value ) );
+					update_post_meta( $post->ID, '_locale', wp_slash( $value ) );
 				},
 				'schema' => array(
 					'description' => __( 'The location of the event.', 'simpleeventlisting' ),
@@ -94,14 +94,14 @@ class Simple_Event_Listing {
 		// Event Link field
 		register_rest_field(
 			'simple_event',
-			'event_link',
+			'link',
 			array(
 				'get_callback' => function ( $data ) {
-					return get_post_meta( $data['id'], '_event_link', true );
+					return get_post_meta( $data['id'], '_link', true );
 				},
 				'update_callback' => function ( $value, $post ) {
 					$value = sanitize_text_field( $value );
-					update_post_meta( $post->ID, '_event_link', wp_slash( $value ) );
+					update_post_meta( $post->ID, '_link', wp_slash( $value ) );
 				},
 				'schema' => array(
 					'description' => __( 'The link to buy ticket or learn more about the event', 'simpleeventlisting' ),
@@ -112,14 +112,14 @@ class Simple_Event_Listing {
 		// Event Start Date field
 		register_rest_field(
 			'simple_event',
-			'event_start_date',
+			'start_date',
 			array(
 				'get_callback' => function ( $data ) {
-					return get_post_meta( $data['id'], '_event_start_date', true );
+					return get_post_meta( $data['id'], '_start_date', true );
 				},
 				'update_callback' => function ( $value, $post ) {
 					$value = sanitize_text_field( $value );
-					update_post_meta( $post->ID, '_event_start_date', wp_slash( $value ) );
+					update_post_meta( $post->ID, '_start_date', wp_slash( $value ) );
 				},
 				'schema' => array(
 					'description' => __( 'The starting date of the event', 'simpleeventlisting' )

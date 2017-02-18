@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 
-let EventList = (props) => props.events ? (
+let EventList = (props) => props.simpleEvents ? (
 	<ul className="event-list">
-		{props.events.map(event => (
-			<li key={`event${event.id}`}>
-				<div>{event.event_start_date}</div>
+		{props.simpleEvents.map(simpleEvent => (
+			<li key={`simpleEvent${simpleEvent.id}`}>
+				<p>{simpleEvent.start_date}</p>
 				<h3 dangerouslySetInnerHTML={{
-          __html: event.title.rendered
+          __html: simpleEvent.title.rendered
         }} />
+        <button
+        	onClick={() => {
+        		if (props.selected && props.selected.id === simpleEvent.id) {
+        			return props.onEdit(null);
+        		}
+        		return props.onEdit(simpleEvent);
+        	}}
+        >Edit</button>
 			</li>
 		))}
 	</ul>
