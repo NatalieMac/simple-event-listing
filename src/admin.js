@@ -3,8 +3,11 @@ import React, {Component} from 'react';
 import {AdminHeader, Button, Notice} from 'components/wp';
 import WPAPI from 'wpapi';
 import WP_API_Settings from 'WP_API_Settings';
-import EventForm from 'components/simple-events/EventForm';
-import EventList from 'components/simple-events/EventList';
+import { Icon } from 'react-fa';
+import EventForm from './components/simple-events/EventForm';
+import EventList from './components/simple-events/EventList';
+
+require('./admin.scss');
 
 class App extends Component {
 
@@ -62,6 +65,9 @@ class App extends Component {
 				status: 'publish'
 			})
 			.then(result => {
+				this.setState({
+					currentEvent: null
+				});
 				this.updateData();
 				return result;
 			});
@@ -98,7 +104,18 @@ class App extends Component {
   }
 
 	render() {
-		let header = <AdminHeader>Simple Event Listing</AdminHeader>;
+		let viewClass = this.state.currentEvent ? 'single-view' : 'list-view';
+		let header = (
+			<div className="app-header">
+				<AdminHeader>Simple Event Listing</AdminHeader>
+				<button
+					className="btn"
+					onClick={()=>this.handleEditClick({})}
+					title="Add new event">
+					<Icon name="plus"/> Add New
+				</button>
+			</div>
+		);
 		let listing = this.state.simpleEvents.length ? (
 			<EventList
 				simpleEvents={this.state.simpleEvents}
@@ -131,7 +148,7 @@ class App extends Component {
 		return (
 			<div className='simple-event-listing'>
 				{header}
-				<div className='simple-event-listing-ui'>
+				<div className={'simple-event-listing-ui' + ' ' + viewClass}>
 					{listing}
 					<EventForm
 						simpleEvent={this.state.currentEvent}

@@ -1,4 +1,7 @@
 import React, {PropTypes, Component} from 'react';
+import { Icon } from 'react-fa';
+
+require('./style.scss');
 
 class EventForm extends Component {
   constructor(props) {
@@ -87,33 +90,39 @@ class EventForm extends Component {
 		};
 
 		return(
-			<form onSubmit={this.handleSubmit}>
-				<h2>{!!this.props.simpleEvent ? 'Edit' : 'Create'} Event</h2>
+			<form onSubmit={this.handleSubmit} className="event-form">
+				<h2>{this.props.simpleEvent && this.props.simpleEvent.id ? 'Edit' : 'Create'} Event</h2>
 				<div className="form-field">
-					<label>Event Title</label>
+					<label htmlFor="title">Event Title</label>
 					{this.state.missingTitle ? (
 						<p class="error">Title is required</p>
 					) : null}
 					<input
 						type="text"
 						name="title"
+						id="title"
+						placeholder="Event Title"
 						value={values.title}
 						onChange={this.handleChange}
 						required />
 				</div>
 				<div className="form-field">
-					<label>Location</label>
+					<label htmlFor="locale">Location</label>
 					<input
 						type="text"
 						name="locale"
+						id="locale"
+						placeholder="Event Location"
 						value={values.locale}
 						onChange={this.handleChange}/>
 				</div>
 				<div className="form-field">
-					<label>Link</label>
+					<label htmlFor="link">Link</label>
 					<input
 						type="text"
 						name="link"
+						id="link"
+						placeholder="http://"
 						value={values.link}
 						onChange={this.handleChange}/>
 				</div>
@@ -121,28 +130,36 @@ class EventForm extends Component {
 					{this.state.missingStartDate ? (
 						<p class="error">Start Date is required</p>
 					) : null}
-					<label>Start Date</label>
+					<label htmlFor="start_date">Start Date</label>
 					<input
 						type="text"
 						name="start_date"
+						id="start_date"
+						placeholder="Jan 1, 2020"
 						value={values.start_date}
 						onChange={this.handleChange}
 						required/>
 				</div>
 				<div className="form-field">
-					<label>Description</label>
+					<label htmlFor="content">Description</label>
 					<textarea
 						name="content"
+						id="content"
+						placeholder="Event description..."
 						value={values.content}
 						onChange={this.handleChange}></textarea>
 				</div>
-				<button
-					type="button"
-					className="button-secondary"
-					onClick={()=>this.props.onCancel(null)}>Cancel</button>
-				<button
-					type="submit"
-					className="button-primary">Save</button>
+				<div className="form-field buttons">
+					<button
+						className="btn gray"
+						type="button"
+						title="Cancel"
+						onClick={()=>this.props.onCancel(null)}><Icon name="ban"/> Cancel</button>
+					<button
+						className="btn"
+						title="Save"
+						type="submit"><Icon name="floppy-o"/> Save</button>
+				</div>
 			</form>
 		);
 	}

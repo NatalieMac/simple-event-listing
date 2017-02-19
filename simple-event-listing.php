@@ -35,7 +35,7 @@ class Simple_Event_Listing {
 
 	static function admin_enqueue_scripts() {
 		wp_register_script( 'simple-event-listing-admin', plugins_url( 'build/admin.js', __FILE__ ), array(), time(), true );
-		wp_enqueue_style( 'simple-event-listing-admin', plugins_url( 'build/admin.css', __FILE__ ), array(), 'v0.0.1');
+		wp_enqueue_style( 'simple-event-listing-admin', plugins_url( 'build/admin.css', __FILE__ ), array(), time());
 
 		wp_localize_script(
 			'simple-event-listing-admin',
