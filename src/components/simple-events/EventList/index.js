@@ -9,7 +9,9 @@ let EventList = (props) => props.simpleEvents ? (
 	<div className="event-list">
 		<ul>
 			{props.simpleEvents.map(simpleEvent => (
-				<li key={`simpleEvent${simpleEvent.id}`}>
+				<li
+					className={simpleEvent.status === 'draft' ? 'status-draft' : ''}
+					key={`simpleEvent${simpleEvent.id}`}>
 					<div className="date">
 						<span className="month">{moment(simpleEvent.start_date).format('MMM')}</span>
 						<span className="day">{moment(simpleEvent.start_date).format('D')}</span>
@@ -30,6 +32,26 @@ let EventList = (props) => props.simpleEvents ? (
 								return props.onEdit(simpleEvent);
 							}}
 						><Icon name="pencil"/></button>
+						<button
+							className="btn-icn"
+							title={simpleEvent.status === 'draft' ? 'Publish Event' : 'Hide Event'}
+							onClick={() => {
+								if (simpleEvent.status === 'draft') {
+									props.onShow(simpleEvent);
+								} else {
+									props.onHide(simpleEvent);
+								}
+							}}
+						><Icon name={simpleEvent.status === 'draft' ? 'eye-slash' : 'eye'}/></button>
+						<button
+							className="btn-icn"
+							title={'Edit ' + simpleEvent.title.rendered}
+							onClick={() =>{
+								if(confirm('Delete ' + simpleEvent.title.rendered + '?')) {
+									props.onDelete(simpleEvent);
+								};
+							}}
+							><Icon name="times"/></button>
 					</div>
 				</li>
 			))}

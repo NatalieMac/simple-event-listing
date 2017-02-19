@@ -20,6 +20,9 @@ class App extends Component {
 			loading: true,
 		};
 
+		this.hideEvent = this.hideEvent.bind(this);
+		this.showEvent = this.showEvent.bind(this);
+		this.deleteEvent = this.deleteEvent.bind(this);
 		this.saveEvent = this.saveEvent.bind(this);
 		this.handleEditClick = this.handleEditClick.bind(this);
 	}
@@ -37,8 +40,44 @@ class App extends Component {
 		this.updateData();
 	}
 
+	hideEvent(simpleEvent) {
+		this.api.simpleEvents()
+			.id(simpleEvent.id)
+			.update(Object.assign(simpleEvent, {
+				status: 'draft'
+			}))
+			.then(result => {
+				this.updateData();
+				return result;
+			})
+	}
+
+	showEvent(simpleEvent) {
+		this.api.simpleEvents()
+			.id(simpleEvent.id)
+			.update(Object.assign(simpleEvent, {
+				status: 'publish'
+			}))
+			.then(result => {
+				this.updateData();
+				return result;
+			})
+	}
+
+	deleteEvent(simpleEvent) {
+		this.api.simpleEvents()
+			.id(simpleEvent.id)
+			.delete()
+			.then(result => {
+				this.updateData();
+				return result;
+			})
+	}
+
 	saveEvent(simpleEvent) {
 		const { currentEvent } = this.state;
+
+		console.table(currentEvent);
 
 		if (currentEvent && currentEvent.id) {
 			return this.api.simpleEvents()
@@ -120,6 +159,9 @@ class App extends Component {
 			<EventList
 				simpleEvents={this.state.simpleEvents}
 				onEdit={this.handleEditClick}
+				onHide={this.hideEvent}
+				onShow={this.showEvent}
+				onDelete={this.deleteEvent}
 				selected={this.state.currentEvent}/>
 		) : (
 			<p>No events found</p>

@@ -16,6 +16,10 @@ $color4: #84cb6b;
 		background: white;
 		display: flex;
 		margin: 0 0 1rem 0;
+		transition: opacity 300ms;
+		&.status-draft {
+			opacity: .5;
+		}
 	}
 	.date {
 		background: $color3;
