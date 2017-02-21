@@ -77,8 +77,6 @@ class App extends Component {
 	saveEvent(simpleEvent) {
 		const { currentEvent } = this.state;
 
-		console.table(currentEvent);
-
 		if (currentEvent && currentEvent.id) {
 			return this.api.simpleEvents()
 				.id(currentEvent.id)

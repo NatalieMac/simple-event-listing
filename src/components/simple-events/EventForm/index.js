@@ -1,6 +1,9 @@
 import React, {PropTypes, Component} from 'react';
 import { Icon } from 'react-fa';
+import moment from 'moment';
+import DatePicker from 'react-datepicker';
 
+require('react-datepicker/dist/react-datepicker.css');
 require('./style.scss');
 
 class EventForm extends Component {
@@ -19,6 +22,7 @@ class EventForm extends Component {
 			start_date: null
 		}
 
+    this.handleDateChange = this.handleDateChange.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -28,6 +32,12 @@ class EventForm extends Component {
     this.setState({
       [name]: value
     });
+  }
+
+  handleDateChange(date) {
+  	this.setState({
+  		start_date: moment(date).format()
+  	});
   }
 
   handleSubmit(event) {
@@ -131,14 +141,14 @@ class EventForm extends Component {
 						<p class="error">Start Date is required</p>
 					) : null}
 					<label htmlFor="start_date">Start Date</label>
-					<input
-						type="text"
-						name="start_date"
+					<DatePicker
 						id="start_date"
-						placeholder="Jan 1, 2020"
-						value={values.start_date}
-						onChange={this.handleChange}
-						required/>
+						dateFormat="MMM DD, YYYY"
+						todayButton={'Today'}
+						selected={moment(values.start_date)}
+						showYearDropdown
+						showMonthDropdown
+						onChange={this.handleDateChange} />
 				</div>
 				<div className="form-field">
 					<label htmlFor="content">Description</label>
