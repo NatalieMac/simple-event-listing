@@ -6,6 +6,7 @@ import WP_API_Settings from 'WP_API_Settings';
 import { Icon } from 'react-fa';
 import EventForm from './components/simple-events/EventForm';
 import EventList from './components/simple-events/EventList';
+import Pagination from './components/simple-events/EventPagination';
 
 require('./admin.scss');
 
@@ -15,6 +16,9 @@ class App extends Component {
 		super(props);
 
 		this.state = {
+			currentPage: 1,
+			totalPages: 1,
+			totalEvents: 0,
 			authError: false,
 			simpleEvents: [],
 			loading: true,
@@ -120,10 +124,14 @@ class App extends Component {
     this.api.simpleEvents()
       .status('any')
       .context('edit')
+      .perPage(5)
+      .page(this.state.currentPage)
       .then(simpleEvents => {
         this.setState({
           loading: false,
           simpleEvents,
+          totalPages: simpleEvents._paging.total,
+          totalEvents: simpleEvents._paging.totalPages
         });
       })
       .catch(e => {
@@ -189,7 +197,15 @@ class App extends Component {
 			<div className='simple-event-listing'>
 				{header}
 				<div className={'simple-event-listing-ui' + ' ' + viewClass}>
-					{listing}
+					<div className="event-list">
+						<Pagination
+							currentPage={this.state.currentPage}
+							totalPages={this.state.totalPages}
+							totalEvents={this.state.totalEvents}
+							updateEvents={this.updateData}
+						/>
+						{listing}
+					</div>
 					<EventForm
 						simpleEvent={this.state.currentEvent}
 						onSubmit={this.saveEvent}
