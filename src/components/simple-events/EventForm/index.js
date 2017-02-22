@@ -91,12 +91,15 @@ class EventForm extends Component {
   }
 
 	render() {
+		let start_date = this.valueOf('start_date');
+		let start_date_obj = start_date ? moment(start_date) : null;
+
 		let values = {
 			title: this.valueOf('title'),
 			content: this.valueOf('content'),
 			locale: this.valueOf('locale'),
 			link: this.valueOf('link'),
-			start_date: this.valueOf('start_date')
+			start_date: start_date_obj
 		};
 
 		return(
@@ -145,7 +148,7 @@ class EventForm extends Component {
 						id="start_date"
 						dateFormat="MMM DD, YYYY"
 						todayButton={'Today'}
-						selected={moment(values.start_date)}
+						selected={values.start_date}
 						showYearDropdown
 						showMonthDropdown
 						onChange={this.handleDateChange} />
