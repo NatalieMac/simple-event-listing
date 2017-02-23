@@ -31,7 +31,11 @@ var webpackConfig = {
 			},
 			{
 				test: /\.scss$/,
-				loader: ExtractTextPlugin.extract( 'style-loader', 'css!sass' )
+				loaders: [
+					ExtractTextPlugin.extract( 'style-loader', 'css!sass' ),
+					'css-loader?importLoaders=1',
+          'postcss-loader?sourceMap=inline'
+				]
 			},
 			{
         test: /\.css$/,
