@@ -7,18 +7,20 @@ require('./style.scss');
 class Pagination extends Component {
 	constructor(props) {
 		super(props);
-
 	}
 
 	render() {
 		if ( this.props.totalEvents > 0) {
-			let pages = new Array(this.props.totalPages);
+			let pages = Array.apply(null, {length: this.props.totalPages}).map((value, index) => index + 1);;
 			return (
 				<nav className="pagination">
 					<ul>
-						<li>The current page is: {this.props.currentPage}</li>
-						<li>The total number of pages is: {this.props.totalPages}</li>
-						<li>The total number of events is: {this.props.totalEvents}</li>
+						{pages.map((page) => (
+							<li
+								className={page === this.props.currentPage ? 'current' : null}
+								onClick={() => this.props.onChangePage(page)}
+								key={page}>{page}</li>
+						))}
 					</ul>
 				</nav>
 			);

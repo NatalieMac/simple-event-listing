@@ -29,6 +29,7 @@ class App extends Component {
 		this.deleteEvent = this.deleteEvent.bind(this);
 		this.saveEvent = this.saveEvent.bind(this);
 		this.handleEditClick = this.handleEditClick.bind(this);
+		this.changePage = this.changePage.bind(this);
 	}
 
 	componentDidMount() {
@@ -120,18 +121,23 @@ class App extends Component {
 		});
 	}
 
+	changePage(page) {
+		this.setState({ currentPage: page}, function() {
+			this.updateData();
+		});
+	}
+
   updateData() {
     this.api.simpleEvents()
       .status('any')
       .context('edit')
-      .perPage(5)
       .page(this.state.currentPage)
       .then(simpleEvents => {
         this.setState({
           loading: false,
           simpleEvents,
-          totalPages: simpleEvents._paging.total,
-          totalEvents: simpleEvents._paging.totalPages
+          totalPages: simpleEvents._paging.totalPages,
+          totalEvents: simpleEvents._paging.total
         });
       })
       .catch(e => {
@@ -202,9 +208,15 @@ class App extends Component {
 							currentPage={this.state.currentPage}
 							totalPages={this.state.totalPages}
 							totalEvents={this.state.totalEvents}
-							updateEvents={this.updateData}
+							onChangePage={this.changePage}
 						/>
 						{listing}
+						<Pagination
+							currentPage={this.state.currentPage}
+							totalPages={this.state.totalPages}
+							totalEvents={this.state.totalEvents}
+							onChangePage={this.changePage}
+						/>
 					</div>
 					<EventForm
 						simpleEvent={this.state.currentEvent}
