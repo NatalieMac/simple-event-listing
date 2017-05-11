@@ -115,6 +115,7 @@ class EventForm extends Component {
 						name="title"
 						id="title"
 						placeholder="Event Title"
+						defaultValue={null}
 						value={values.title}
 						onChange={this.handleChange}
 						required />
@@ -126,6 +127,7 @@ class EventForm extends Component {
 						name="locale"
 						id="locale"
 						placeholder="Event Location"
+						defaultValue={null}
 						value={values.locale}
 						onChange={this.handleChange}/>
 				</div>
@@ -136,6 +138,7 @@ class EventForm extends Component {
 						name="link"
 						id="link"
 						placeholder="http://"
+						defaultValue={null}
 						value={values.link}
 						onChange={this.handleChange}/>
 				</div>
@@ -151,6 +154,7 @@ class EventForm extends Component {
 						selected={values.start_date}
 						showYearDropdown
 						showMonthDropdown
+						defaultValue={null}
 						onChange={this.handleDateChange} />
 				</div>
 				<div className="form-field">
@@ -159,6 +163,7 @@ class EventForm extends Component {
 						name="content"
 						id="content"
 						placeholder="Event description..."
+						defaultValue={null}
 						value={values.content}
 						onChange={this.handleChange}></textarea>
 				</div>

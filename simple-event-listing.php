@@ -62,7 +62,7 @@ class Simple_Event_Listing {
 			'description' => __( 'Events to be listed', 'simpleeventlisting' ),
 			'hierarchical' => false,
 			'menu_position' => null,
-			'public' => false,
+			'public' => true,
 			'show_in_rest' => true,
 			'rest_base' => 'simpleEvents',
 			'capability_type' => 'post',
@@ -71,6 +71,11 @@ class Simple_Event_Listing {
 
 		register_post_type( 'simple_event', $args );
 	}
+
+  static function rest_query_vars( $vars ) {
+		$vars[] = 'meta_query';
+		return $vars;
+  }
 
 	static function register_rest_fields() {
 		// Event Location field
@@ -119,7 +124,8 @@ class Simple_Event_Listing {
 				},
 				'update_callback' => function ( $value, $post ) {
 					$value = sanitize_text_field( $value );
-					update_post_meta( $post->ID, '_start_date', wp_slash( $value ) );
+					$value = new DateTime( $value );
+					update_post_meta( $post->ID, '_start_date', wp_slash( $value->format( 'Ymd' ) ) );
 				},
 				'schema' => array(
 					'description' => __( 'The starting date of the event', 'simpleeventlisting' )
@@ -127,9 +133,42 @@ class Simple_Event_Listing {
 			)
 		);
 	}
+
+	static function get_upcoming_posts( $data ) {
+		$today = date('Y-m-d');
+
+		$args = array(
+			'post_type' => 'simple_event',
+			'orderby'	=> 'meta_value',
+			'meta_key'	=> 'start_date',
+			'meta_query'	=> array(
+				array(
+					'key'	=> 'start_date',
+					'compare'	=> '>=',
+					'value'	=> $today
+				),
+			),
+			'order'	=> 'ASC',
+		);
+
+		$events = new WP_Query( $args );
+
+		// return json_encode($events->get_posts());
+
+		return $events;
+	}
 }
 
 add_action( 'widgets_init', array( 'Simple_Event_Listing', 'widgets_init' ) );
 add_action( 'init', array( 'Simple_Event_Listing', 'register_event_post_type' ) );
 add_action ('rest_api_init', array( 'Simple_Event_Listing', 'register_rest_fields' ) );
 add_action( 'admin_menu', array( 'Simple_Event_Listing', 'add_admin_page' ) );
+
+add_filter( 'rest_query_vars', array( 'Simple_Event_Listing', 'rest_query_vars' ) );
+
+add_action( 'rest_api_init', function () {
+  register_rest_route( 'sel/v2', '/upcoming-events', array(
+    'methods' => 'GET',
+    'callback' => array( 'Simple_Event_Listing', 'get_upcoming_posts' )
+  ) );
+} );

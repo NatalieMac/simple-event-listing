@@ -22,6 +22,7 @@ class App extends Component {
 			authError: false,
 			simpleEvents: [],
 			loading: true,
+			currentEvent: {}
 		};
 
 		this.hideEvent = this.hideEvent.bind(this);
@@ -39,7 +40,7 @@ class App extends Component {
 		});
 
 		this.api.simpleEvents = this.api.registerRoute( 'wp/v2', 'simpleEvents/(?P<id>[\\d]+)', {
-			params: ['status']
+			params: ['status', 'start_date', 'orderby', 'order']
 		});
 
 		this.updateData();
