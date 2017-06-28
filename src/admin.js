@@ -7,6 +7,7 @@ import { Icon } from 'react-fa';
 import EventForm from './components/simple-events/EventForm';
 import EventList from './components/simple-events/EventList';
 import Pagination from './components/simple-events/EventPagination';
+import EventView from './components/simple-events/EventView';
 
 require('./admin.scss');
 
@@ -22,7 +23,9 @@ class App extends Component {
 			authError: false,
 			simpleEvents: [],
 			loading: true,
-			currentEvent: {}
+			currentEvent: {},
+			addingEvent: false,
+			viewType: 'upcoming'
 		};
 
 		this.hideEvent = this.hideEvent.bind(this);
@@ -30,7 +33,9 @@ class App extends Component {
 		this.deleteEvent = this.deleteEvent.bind(this);
 		this.saveEvent = this.saveEvent.bind(this);
 		this.handleEditClick = this.handleEditClick.bind(this);
+		this.cancelEventAdd = this.cancelEventAdd.bind(this);
 		this.changePage = this.changePage.bind(this);
+		this.changeView = this.changeView.bind(this);
 	}
 
 	componentDidMount() {
@@ -40,7 +45,7 @@ class App extends Component {
 		});
 
 		this.api.simpleEvents = this.api.registerRoute( 'wp/v2', 'simpleEvents/(?P<id>[\\d]+)', {
-			params: ['status', 'start_date', 'orderby', 'order']
+			params: ['status']
 		});
 
 		this.updateData();
@@ -91,7 +96,8 @@ class App extends Component {
 				}))
 				.then(result => {
 					this.setState({
-						currentEvent: null
+						currentEvent: null,
+						addingEvent: false
 					});
 					this.updateData();
 					return result;
@@ -109,7 +115,8 @@ class App extends Component {
 			})
 			.then(result => {
 				this.setState({
-					currentEvent: null
+					currentEvent: null,
+					addingEvent: false,
 				});
 				this.updateData();
 				return result;
@@ -118,7 +125,15 @@ class App extends Component {
 
 	handleEditClick(simpleEvent) {
 		this.setState({
-			currentEvent: simpleEvent
+			currentEvent: simpleEvent,
+			addingEvent: true,
+		});
+	}
+
+	cancelEventAdd() {
+		this.setState({
+			currentEvent: {},
+			addingEvent: false,
 		});
 	}
 
@@ -128,44 +143,63 @@ class App extends Component {
 		});
 	}
 
-  updateData() {
-    this.api.simpleEvents()
-      .status('any')
-      .context('edit')
-      .page(this.state.currentPage)
-      .then(simpleEvents => {
-        this.setState({
-          loading: false,
-          simpleEvents,
-          totalPages: simpleEvents._paging.totalPages,
-          totalEvents: simpleEvents._paging.total
-        });
-      })
-      .catch(e => {
-        this.setState({
-          loading: false,
-        });
-        if (e.data && e.data.status === 400) {
-        	this.setState({
-        		authError: true
-        	});
-        } else {
-          console.error(e);
-        }
-      });
-  }
+	changeView(newView) {
+		this.setState({
+			viewType: newView,
+			addingEvent: false,
+		}, function(){
+			this.updateData();
+		});
+	}
+
+	updateData() {
+		this.api.simpleEvents()
+			.status('any')
+			.context('edit')
+			.page(this.state.currentPage)
+			.orderby('relevance')
+			.search(this.state.viewType)
+			.then(simpleEvents => {
+				this.setState({
+					loading: false,
+					simpleEvents,
+					totalPages: simpleEvents._paging ? simpleEvents._paging.totalPages : null,
+					totalEvents: simpleEvents._paging ? simpleEvents._paging.total : null
+				});
+			})
+			.catch(e => {
+				this.setState({
+					loading: false,
+				});
+				if (e.data && e.data.status === 400) {
+					this.setState({
+						authError: true
+					});
+				} else {
+					console.error(e);
+				}
+			});
+	}
 
 	render() {
-		let viewClass = this.state.currentEvent ? 'single-view' : 'list-view';
+		let viewClass = this.state.addingEvent ? 'single-view' : 'list-view';
+		let addButton = (
+			<button
+				className="btn"
+				onClick={()=>this.handleEditClick({})}
+				title="Add new event">
+				<Icon name="plus"/> Add New
+			</button>
+		);
 		let header = (
 			<div className="app-header">
-				<AdminHeader>Simple Event Listing</AdminHeader>
-				<button
-					className="btn"
-					onClick={()=>this.handleEditClick({})}
-					title="Add new event">
-					<Icon name="plus"/> Add New
-				</button>
+				<div className="app-title">
+					<AdminHeader>Simple Event Listing</AdminHeader>
+					<EventView
+						onClick={this.changeView}
+						currentView={this.state.viewType}/>
+				</div>
+				{addButton}
 			</div>
 		);
 		let listing = this.state.simpleEvents.length ? (
@@ -177,8 +211,24 @@ class App extends Component {
 				onDelete={this.deleteEvent}
 				selected={this.state.currentEvent}/>
 		) : (
-			<p>No events found</p>
+			<div>
+				<p>
+					No {this.state.viewType == 'upcoming' || this.state.viewType == 'past' ? this.state.viewType : ''} events found.
+				</p>
+				{this.state.viewType == 'upcoming' ? addButton : ''}
+			</div>
 		);
+
+		let pagination = this.state.totalPages > 1 ? (
+			<Pagination
+				currentPage={this.state.currentPage}
+				totalPages={this.state.totalPages}
+				totalEvents={this.state.totalEvents}
+				onChangePage={this.changePage}
+			/>
+			) : (
+				null
+			);
 
 
 		if (this.state.authError) {
@@ -205,24 +255,14 @@ class App extends Component {
 				{header}
 				<div className={'simple-event-listing-ui' + ' ' + viewClass}>
 					<div className="event-list">
-						<Pagination
-							currentPage={this.state.currentPage}
-							totalPages={this.state.totalPages}
-							totalEvents={this.state.totalEvents}
-							onChangePage={this.changePage}
-						/>
+						{pagination}
 						{listing}
-						<Pagination
-							currentPage={this.state.currentPage}
-							totalPages={this.state.totalPages}
-							totalEvents={this.state.totalEvents}
-							onChangePage={this.changePage}
-						/>
+						{pagination}
 					</div>
 					<EventForm
 						simpleEvent={this.state.currentEvent}
 						onSubmit={this.saveEvent}
-						onCancel={this.handleEditClick}/>
+						onCancel={this.cancelEventAdd}/>
 				</div>
 			</div>
 		);
