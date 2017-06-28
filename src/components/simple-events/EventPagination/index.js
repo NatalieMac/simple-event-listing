@@ -25,6 +25,11 @@ class Pagination extends Component {
 				</nav>
 			);
 		}
+
+		return(
+			<nav>
+			</nav>
+		);
 	}
 }
 
