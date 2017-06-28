@@ -135,19 +135,19 @@ class Simple_Event_Listing {
 	}
 
 	static function get_upcoming_posts( $data ) {
-		$today = date('Y-m-d');
+		$today = date('Ymd');
 
 		$args = array(
 			'post_type' => 'simple_event',
-			'orderby'	=> 'meta_value',
-			'meta_key'	=> 'start_date',
 			'meta_query'	=> array(
 				array(
-					'key'	=> 'start_date',
+					'key'	=> '_start_date',
 					'compare'	=> '>=',
 					'value'	=> $today
 				),
 			),
+			'orderby'	=> 'meta_value',
+			'meta_key'	=> '_start_date',
 			'order'	=> 'ASC',
 		);
 
@@ -155,7 +155,78 @@ class Simple_Event_Listing {
 
 		// return json_encode($events->get_posts());
 
-		return $events;
+		return $events->get_posts();
+	}
+
+	static function get_past_posts( $data ) {
+		$today = date('Ymd');
+
+		$args = array(
+			'post_type' => 'simple_event',
+			'meta_query'	=> array(
+				array(
+					'key'	=> '_start_date',
+					'compare'	=> '<',
+					'value'	=> $today
+				),
+			),
+			'orderby'	=> 'meta_value',
+			'meta_key'	=> '_start_date',
+			'order'	=> 'DESC',
+		);
+
+		$events = new WP_Query( $args );
+
+		// return json_encode($events->get_posts());
+
+		return $events->get_posts();
+	}
+
+	static function pre_get_posts( $query ) {
+		if ( empty( $query->query_vars['post_type'] ) || $query->query_vars['post_type'] !== 'simple_event' ) {
+			return $query;
+		}
+
+		if ( empty( $query->query_vars['orderby'] ) || $query->query_vars['orderby'] !== 'relevance' ) {
+			return $query;
+		}
+
+		$query_type = $query->query_vars[ 's' ];
+		unset( $query->query_vars['s'] );
+		unset( $query->query_vars['orderby']);
+		$meta_query;
+		$today = date( 'Ymd' );
+		$query->set( 'orderby', 'meta_value_num' );
+		$query->set( 'meta_key', '_start_date' );
+
+		switch ( $query_type ) {
+			case 'upcoming':
+				$meta_query = array(
+					array(
+						'key'	=> '_start_date',
+						'compare' => '>=',
+						'value' => $today,
+					),
+				);
+				$query->set( 'meta_query', $meta_query);
+				$query->set( 'order', 'ASC' );
+				break;
+			case 'past':
+				$meta_query = array(
+					array(
+						'key' => '_start_date',
+						'compare'	=> '<',
+						'value' => $today,
+					),
+				);
+				$query->set( 'order', 'DESC' );
+				$query->set( 'meta_query', $meta_query );
+				break;
+			default:
+				$query->set( 'order', 'DESC' );
+		}
+
+		return $query;
 	}
 }
 
@@ -166,9 +237,15 @@ add_action( 'admin_menu', array( 'Simple_Event_Listing', 'add_admin_page' ) );
 
 add_filter( 'rest_query_vars', array( 'Simple_Event_Listing', 'rest_query_vars' ) );
 
+add_action( 'pre_get_posts', array( 'Simple_Event_Listing', 'pre_get_posts' ) );
+
 add_action( 'rest_api_init', function () {
   register_rest_route( 'sel/v2', '/upcoming-events', array(
     'methods' => 'GET',
     'callback' => array( 'Simple_Event_Listing', 'get_upcoming_posts' )
+  ) );
+  register_rest_route( 'sel/v2', '/past-events', array(
+    'methods' => 'GET',
+    'callback' => array( 'Simple_Event_Listing', 'get_past_posts' )
   ) );
 } );
