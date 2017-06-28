@@ -39,10 +39,12 @@ $color4: #84cb6b;
 .wrap .app-header {
 	background: white;
 	display: flex;
-	font-size: 1.5rem;
 	justify-content: space-between;
 	margin: 0 0 1rem;
 	padding: 1rem 2rem;
+	h1 {
+		font-size: 1.5rem;
+	}
 }
 
 /* ------------------------------------------- */
